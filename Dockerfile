@@ -1,6 +1,6 @@
-FROM node
+FROM buildkite/puppeteer:latest
 
-RUN apt-get update \
+RUN apt-get -qq update \
     && apt-get install -y \
         curl \
         gcc \
@@ -13,12 +13,12 @@ RUN apt-get update \
         libatk-bridge2.0-0 \
         libgtk-3-0 \
         fluxbox \
-        wmctrl
+        wmctrl \
+        pulseaudio
+
+RUN adduser root pulse-access
 
 WORKDIR /app
-
-ADD package.json package-lock.json /app/
-RUN npm ci
 
 ADD main.js entrypoint.sh /app/
 ADD extension /app/extension/

@@ -4,11 +4,21 @@ const TIME_SLICE = 5000
 const MIME_TYPE = 'audio/webm; codecs=pcm' 
 const BIT_RATE = 128000
 
-let recorder
+let recorder = null
+
+function exportMedia(chunks) {
+  console.log('Downloading media')
+  const blob = new Blob(chunks, {
+    type: MIME_TYPE,
+  })
+  chrome.downloads.download({
+    url: URL.createObjectURL(blob),
+  })
+}
 
 async function startRecording() {
   chrome.desktopCapture.chooseDesktopMedia(
-    ['window', 'audio'],
+    ['tab', 'audio'],
     streamId => {
       console.log('Selecting stream')
         navigator.webkitGetUserMedia(
@@ -25,20 +35,16 @@ async function startRecording() {
             })
             recorder.onerror = event => console.log('Unable to start recording:', event)
             recorder.ondataavailable = event => {
-                console.log('dataavailable', JSON.stringify(event.data.size))
-                if (event.data.size > 0) {
-                  console.log('Downloading slice')
-                  const buffer = new Blob([event.data], {
-                      type: MIME_TYPE,
-                  })
-                  const url = URL.createObjectURL(buffer)
-                  chrome.downloads.download({ url })
-                }
+              console.log('recorder.dataavailable', event.data.size)
+              exportMedia([event.data])
+            }
+            recorder.onstop = event => {
+              console.log('recorder.stop', event)
             }
             recorder.start(TIME_SLICE)
             console.log('Recording started!')
           },
-          error => console.log('Unable to get user media:', error),
+          error => console.log('Unable to get user media:', error.message),
         )
     },
   )
@@ -46,7 +52,6 @@ async function startRecording() {
 
 console.log('Started background script')
 chrome.runtime.onConnect.addListener(port => {
-  // let recorder = null
   console.log('connected to chrome runtime')
   port.onMessage.addListener(async msg => {
     console.log('received new message')
@@ -70,8 +75,6 @@ chrome.runtime.onConnect.addListener(port => {
           return
         }
         port.recorderPlaying = true
-        const tab = port.sender.tab
-        tab.url = msg.data.url 
 
         await startRecording()
 

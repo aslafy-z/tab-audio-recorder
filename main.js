@@ -1,7 +1,8 @@
 const puppeteer = require('puppeteer')
 
-const TARGET_URL = 'https://www.w3schools.com/tags/tryit.asp?filename=tryhtml5_video_autoplay'
-// const TARGET_URL = 'https://meet.jit.si/TheBigBillys'
+// const TARGET_URL = 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv'
+const TARGET_URL = 'https://meet.jit.si/TheBigBillys'
+// const TARGET_URL = 'https://www.youtube.com/watch?v=5qap5aO4i9A'
 
 const EXTENSION_PATH = 'extension'
 const DOWNLOAD_DIR = '/tmp/recordings'
@@ -30,6 +31,18 @@ const options = {
   ],
 }
 
+const makeLogProxy = prefix => (async msg => {
+  function describe(jsHandle) {
+    return jsHandle.executionContext().evaluate(obj => {
+      return JSON.stringify(obj)
+    }, jsHandle)
+  }
+  const args = await Promise.all(msg.args().map(arg => 
+    typeof arg === 'string' ? arg : describe(arg)
+  ))
+  console.log(prefix, ...args)
+})
+
 async function main() {
     console.log('[main] Launching browser')
     const browser = await puppeteer.launch(options)
@@ -38,8 +51,8 @@ async function main() {
     const targets = await browser.targets()
     const backgroundPageTarget = targets.find(target => target.type() === 'background_page')
     const backgroundPage = await backgroundPageTarget.page()
-    backgroundPage.on('error', msg => console.log(`[background] ${msg.text()}`))
-    backgroundPage.on('console', msg => console.log(`[ERR][background] ${msg.text()}`))
+    backgroundPage.on('error', makeLogProxy('[ERR][background]'))
+    backgroundPage.on('console', makeLogProxy('[background]'))
 
     console.log('[main] Allow background download')
     await backgroundPage._client.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: DOWNLOAD_DIR })
@@ -53,8 +66,8 @@ async function main() {
     await page.setBypassCSP(true)
 
     console.log('[main] Enable page log')
-    page.on('console', msg => console.log('[page]', msg.text()))
-    page.on('error', msg => console.log(`[ERR][page] ${msg.text()}`))
+    page.on('error', makeLogProxy('[ERR][page]'))
+    page.on('console', makeLogProxy('[page]'))
 
     console.log('[main] moving to page context')
     await page.evaluate(async (TAG_TARGET_NAME) => {
@@ -73,9 +86,9 @@ async function main() {
       }
 
       console.log('[main] Dispatch REC_CLIENT_PLAY')
-      window.sendRecorderMessage({ type: 'REC_CLIENT_PLAY', data: { url: window.location.origin } })
+      window.sendRecorderMessage({ type: 'REC_CLIENT_PLAY' })
 
-      await new Promise(resolve => setTimeout(resolve, 9915000))
+      await new Promise(resolve => setTimeout(resolve, 20000))
 
       console.log('[main] Dispatch REC_CLIENT_STOP')
       window.sendRecorderMessage({ type: 'REC_CLIENT_STOP' })
