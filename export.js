@@ -3,13 +3,16 @@ import puppeteer from 'puppeteer'
 const EXTENSION_PATH = 'extension'
 const DOWNLOAD_DIR = '/tmp/recordings'
 const TAG_TARGET_NAME = 'pickme'
-const EXTENSION_ID = process.env.EXTENSION_ID
+// TODO: Remove / fix line below, expanded to `undefined` at runtime
+// const EXTENSION_ID = process.env.EXTENSION_ID
 
 const options = {
   // executablePath: "/usr/bin/google-chrome-stable",
   headless: false,
   ignoreDefaultArgs: [
     '--mute-audio',
+    '--disable-extensions',
+    '--disable-component-extensions-with-background-pages'
   ],
   args: [
     '--enable-usermedia-screen-capturing',
@@ -22,12 +25,11 @@ const options = {
     `--disable-extensions-except=${EXTENSION_PATH}`,
     '--autoplay-policy=no-user-gesture-required',
     '--disable-infobars',
-    `--whitelisted-extension-id=${EXTENSION_ID}`,
+    // `--whitelisted-extension-id=${EXTENSION_ID}`,
     // '--use-fake-device-for-media-stream',
     // '--use-file-for-fake-audio-capture=/dev/urandom',
   ],
 }
-
 async function main() {
     const browser = await puppeteer.launch(options)
 
