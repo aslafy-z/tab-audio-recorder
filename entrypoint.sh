@@ -62,16 +62,11 @@ run_vnc_server() {
 run_pulseaudio_server() {
     rm -rf /var/run/pulse /var/lib/pulse /root/.config/pulse
     pulseaudio -D --exit-idle-time=-1 --system --disallow-exit
-    # echo "Creating virtual audio sink: ";
-    # pactl load-module module-virtual-sink source_name=VirtualSink
-    # echo "Setting default sink: ";
-    # pactl set-default-sink VirtualSink
- 
-    echo "Creating virtual audio source: ";
+    echo "Creating virtual audio source: "
     pactl load-module module-virtual-source master=auto_null.monitor format=s16le source_name=VirtualMic
-    echo "Setting default source: ";
+    echo "Setting default source: "
     pactl set-default-source VirtualMic
-
+    pavucontrol >/dev/null 2>&1 &
     # pactl set-source-mute 1 1
 }
 
@@ -80,7 +75,6 @@ control_c() {
     exit
 }
 trap control_c SIGINT SIGTERM SIGHUP
-
 
 launch_xvfb
 launch_window_manager

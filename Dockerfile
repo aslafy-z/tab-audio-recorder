@@ -1,20 +1,13 @@
 FROM buildkite/puppeteer:latest
 
 RUN apt-get -qq update \
-    && apt-get install -y \
-        curl \
-        gcc \
-        g++ \
-        make \
+    && apt-get install -y --no-install-recommends \
         xvfb \
         x11vnc \
-        chromium \
-        libgbm-dev \
-        libatk-bridge2.0-0 \
-        libgtk-3-0 \
         fluxbox \
         wmctrl \
-        pulseaudio
+        pulseaudio \
+        pavucontrol
 
 RUN adduser root pulse-access
 

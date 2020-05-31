@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer')
 
 // const TARGET_URL = 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.ogv'
-const TARGET_URL = 'https://meet.jit.si/TheBigBillys'
+const TARGET_URL = 'https://meet.jit.si/TheBigBillys#config.startWithAudioMuted=true&config.startWithVideoMuted=true'
 // const TARGET_URL = 'https://www.youtube.com/watch?v=5qap5aO4i9A'
 
 const EXTENSION_PATH = 'extension'
@@ -37,10 +37,10 @@ const makeLogProxy = prefix => (async msg => {
       return JSON.stringify(obj)
     }, jsHandle)
   }
-  const args = await Promise.all(msg.args().map(arg => 
-    typeof arg === 'string' ? arg : describe(arg)
-  ))
-  console.log(prefix, ...args)
+  const args = await Promise.all(msg.args().map(arg =>
+     typeof arg === 'string' ? arg : describe(arg)
+  )).catch(_ => undefined)
+  console.log(prefix, ...(args || []))
 })
 
 async function main() {
