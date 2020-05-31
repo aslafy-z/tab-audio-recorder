@@ -1,6 +1,7 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const startButton = document.getElementById('start')
-    startButton.onclick = () => {
-        chrome.runtime.connect(chrome.runtime.id).postMessage({ type: 'REC_CLIENT_PLAY' });
-    }
+console.log('[cs] Starting content script')
+const runtime = chrome.runtime.connect(chrome.runtime.id)
+console.log('[cs] Adding event listener')
+document.addEventListener('recorderMessage', function (event) {
+    console.log('[cs] Forwarding event', event.detail)
+    runtime.postMessage(event.detail);
 })

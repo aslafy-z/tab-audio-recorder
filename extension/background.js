@@ -1,14 +1,14 @@
 /* global chrome, MediaRecorder, FileReader */
 
-const TIME_SLICE = 1000
+const TIME_SLICE = 5000
 const MIME_TYPE = 'audio/webm; codecs=pcm' 
-const BIT_RATE = 32000
+const BIT_RATE = 128000
 
 let recorder;
 
 async function startRecording() {
   chrome.desktopCapture.chooseDesktopMedia(
-    ['screen', 'audio'],
+    ['window', 'audio'],
     streamId => {
       console.log('Selecting stream')
         navigator.webkitGetUserMedia(
@@ -44,10 +44,12 @@ async function startRecording() {
   )
 }
 
+console.log('Started background script')
 chrome.runtime.onConnect.addListener(port => {
   // let recorder = null
-
+  console.log('connected to chrome runtime')
   port.onMessage.addListener(async msg => {
+    console.log('received new message')
     switch (msg.type) {
       case 'REC_CLIENT_STOP':
         console.log('Stopping recording')
@@ -68,8 +70,8 @@ chrome.runtime.onConnect.addListener(port => {
           return
         }
         port.recorderPlaying = true
-        // const tab = port.sender.tab
-        // tab.url = msg.data.url 
+        const tab = port.sender.tab
+        tab.url = msg.data.url 
 
         // console.log(chrome.tabCapture);
         await startRecording()
