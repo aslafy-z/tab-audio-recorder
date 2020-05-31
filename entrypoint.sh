@@ -70,4 +70,5 @@ launch_xvfb
 launch_window_manager
 run_vnc_server &
 
-env DEBUG="puppeteer:*" node export.js 2>&1 | grep -v '"Network' > /dev/stdout
+# env DEBUG="puppeteer:*" node export.js 2>&1 | grep -v '"Network'
+node main.js

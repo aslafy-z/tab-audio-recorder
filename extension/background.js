@@ -4,7 +4,7 @@ const TIME_SLICE = 5000
 const MIME_TYPE = 'audio/webm; codecs=pcm' 
 const BIT_RATE = 128000
 
-let recorder;
+let recorder
 
 async function startRecording() {
   chrome.desktopCapture.chooseDesktopMedia(
@@ -59,7 +59,7 @@ chrome.runtime.onConnect.addListener(port => {
         }
         port.recorderPlaying = false
 
-        // recorder.stop()
+        recorder.stop()
         console.log('Recording stopped!')
         break
 
@@ -73,7 +73,6 @@ chrome.runtime.onConnect.addListener(port => {
         const tab = port.sender.tab
         tab.url = msg.data.url 
 
-        // console.log(chrome.tabCapture);
         await startRecording()
 
         break

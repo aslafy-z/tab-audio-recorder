@@ -1,6 +1,7 @@
 FROM node
-RUN apt-get update && \
-    apt-get install -y \
+
+RUN apt-get update \
+    && apt-get install -y \
         curl \
         gcc \
         g++ \
@@ -13,9 +14,13 @@ RUN apt-get update && \
         libgtk-3-0 \
         fluxbox \
         wmctrl
+
 WORKDIR /app
+
 ADD package.json package-lock.json /app/
-RUN npm i
-ADD export.js entrypoint.sh /app/
+RUN npm ci
+
+ADD main.js entrypoint.sh /app/
 ADD extension /app/extension/
+
 CMD /app/entrypoint.sh
